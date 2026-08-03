@@ -47,7 +47,7 @@ android.allow_backup = True
 log_level = 2
 
 # (str) Buildozer 警告等级
-warn_on_root = 1
+warn_on_root = 0
 
 # (str) 日志路径
 # log_path = .buildozer/log
@@ -62,7 +62,7 @@ warn_on_root = 1
 log_level = 2
 
 # (int) 显示警告
-warn_on_root = 1
+warn_on_root = 0
 
 # (str) Buildozer 路径
 # buildozer_dir = .buildozer
