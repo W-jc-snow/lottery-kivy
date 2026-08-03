@@ -1,0 +1,50 @@
+name: Build APK
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential git python3-pip python3-dev \
+            autoconf automake libtool pkg-config \
+            libncurses5-dev zlib1g-dev ccache \
+            libffi-dev libssl-dev
+
+          pip install --upgrade pip
+          pip install buildozer cython
+
+      - name: Cache buildozer
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.buildozer
+            .buildozer
+          key: buildozer-${{ hashFiles('buildozer.spec') }}
+
+      - name: Build APK
+        run: |
+          buildozer -v android debug
+        env:
+          CI: true
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: lottery-app
+          path: bin/*.apk
