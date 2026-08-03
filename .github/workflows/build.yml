@@ -8,52 +8,25 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    container:
+      image: kivy/buildozer:latest
+      options: --user root
+
     steps:
-      - name: Checkout
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-
-      - name: Install dependencies
+      - name: Fix permissions
         run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            build-essential git python3-pip python3-dev \
-            autoconf automake libtool pkg-config \
-            libncurses5-dev zlib1g-dev ccache \
-            libffi-dev libssl-dev
+          chown -R $(whoami) .
+          mkdir -p /opt/android-sdk
+          echo "y" | sdkmanager --licenses 2>/dev/null || true
 
-          pip install --upgrade pip
-          pip install buildozer cython
-
-      - name: Accept Android SDK licenses
+      - name: Build APK with buildozer
         run: |
-          sudo mkdir -p /opt/android-sdk/licenses
-          echo -e "\n24333f8a63b6825ea9c5514f83c2829b004d1fee" | sudo tee /opt/android-sdk/licenses/android-sdk-license > /dev/null
-          echo -e "\n84831b9409646a918e30573bab4c9c91346d8abd" | sudo tee /opt/android-sdk/licenses/android-sdk-preview-license > /dev/null
-          echo -e "\nd975f751698a77b662f1254ddbeed3901e976f5a" | sudo tee /opt/android-sdk/licenses/android-sdk-license > /dev/null
+          buildozer android debug
 
-      - name: Cache buildozer
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.buildozer
-            .buildozer
-          key: buildozer-${{ hashFiles('buildozer.spec') }}
-
-      - name: Build APK
-        run: |
-          buildozer -v android debug
-        env:
-          CI: true
-          ANDROID_SDK_HOME: /opt/android-sdk
-          ANDROID_HOME: /opt/android-sdk
-          ANDROID_SDK_ROOT: /opt/android-sdk
-
-      - name: Upload APK
+      - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: lottery-app
