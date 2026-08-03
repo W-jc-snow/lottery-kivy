@@ -39,7 +39,7 @@ android.api = 33
 
 # (str) Android NDK 版本
 android.ndk = 25b
-
+android.accept_sdk_license = True
 # (bool) 是否允许备份
 android.allow_backup = True
 
